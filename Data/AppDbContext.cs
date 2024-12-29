@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using AmigoOculto.Model;
+using AmigoOculto.Models;
 
 namespace AmigoOculto.Data
 {

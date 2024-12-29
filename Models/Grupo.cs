@@ -1,4 +1,4 @@
-﻿namespace AmigoOculto.Model
+﻿namespace AmigoOculto.Models
 {
     public class Grupo
     {
