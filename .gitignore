@@ -458,3 +458,4 @@ $RECYCLE.BIN/
 !.vscode/launch.json
 !.vscode/extensions.json
 /AmigoOculto.csproj.user
+/Properties/launchSettings.json
