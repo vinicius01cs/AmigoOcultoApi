@@ -270,6 +270,8 @@ ServiceFabricBackup/
 
 # SQLite Filles
 *.sqlite
+*.sqlite-shm
+*.sqlite-wal
 
 # Business Intelligence projects
 *.rdl.data
@@ -455,3 +457,4 @@ $RECYCLE.BIN/
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+/AmigoOculto.csproj.user
