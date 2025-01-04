@@ -8,6 +8,7 @@ namespace AmigoOculto.Data
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
         public DbSet<Grupo> Grupos { get; set; }
+        public DbSet<Participante> Participantes { get; set; }
 
     }
 }
