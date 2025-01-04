@@ -4,6 +4,7 @@ using AmigoOculto.Data;
 using AmigoOculto.DTO;
 using Microsoft.EntityFrameworkCore;
 using AmigoOculto.ViewModels;
+using AmigoOculto.Services;
 
 namespace AmigoOculto.Controllers
 {
@@ -11,6 +12,9 @@ namespace AmigoOculto.Controllers
     [Route("v1")]
     public class GrupoController : ControllerBase
     {
+
+        private readonly GrupoServices grupoServices;
+
         [HttpGet]
         [Route("grupos")]
         public async Task<IActionResult> GetAsync([FromServices] AppDbContext context)
@@ -97,36 +101,24 @@ namespace AmigoOculto.Controllers
             {
                 return BadRequest();
             }
-            var participantes = await context.Participantes.AsNoTracking().Where(p => p.GrupoId == grupoId).ToListAsync();
+
+            var participantes = await grupoServices.ObterParticipantesSorteioAsync(context, grupoId);
 
             if (participantes.Count < 3)
             {
                 return BadRequest(new { message = "O grupo precisa ter ao menos 3 participantes para realizar o sorteio" });
             }
 
-            var random = new Random();
-            var embaralhados = participantes.OrderBy(x => random.Next()).ToList();
-
-            var sorteios = new List<Sorteio>();
-            for (int i = 0; i < embaralhados.Count; i++)
-            {
-                var participante = embaralhados[i];
-                var amigoOculto = embaralhados[(i + 1) % embaralhados.Count];
-
-                sorteios.Add(new Sorteio
-                {
-                    GrupoId = grupoId,
-                    ParticipanteId = participante.Id,
-                    AmigoOcultoId = amigoOculto.Id
-                });
-            }
+            var sorteios = grupoServices.SortearGrupo(participantes, grupoId);
 
             try
             {
                 await context.Sorteios.AddRangeAsync(sorteios);
                 await context.SaveChangesAsync();
-                return Ok(new { message = "Sorteio realizado com sucesso ! "});
-            }catch(Exception e)
+                return Ok(new { message = "Sorteio realizado com sucesso ! " });
+
+            }
+            catch (Exception e)
             {
                 return BadRequest();
             }
