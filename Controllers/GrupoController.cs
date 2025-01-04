@@ -128,7 +128,20 @@ namespace AmigoOculto.Controllers
         [HttpGet("grupos/{grupoId}/sorteio")]
         public async Task<IActionResult> GetSorteioAsync([FromServices] AppDbContext context, [FromRoute] int grupoId)
         {
-            var sorteio = await context.Sorteios.AsNoTracking().Where(x => x.GrupoId == grupoId).ToListAsync();
+            var sorteio = await context.Sorteios
+                .Where(x => x.GrupoId == grupoId)
+                .Select(x => new GrupoSorteioDto
+                {
+                    Id = x.Id,
+                    GrupoId = x.GrupoId,
+                    ParticipanteId = x.Participante.Id,
+                    ParticipanteNome = x.Participante.Nome,
+                    ParticipanteEmail = x.Participante.Email,
+                    AmigoOcultoId = x.AmigoOcultoId,
+                    AmigoOcultoNome = x.AmigoOculto.Nome,
+                    AmigoOcultoEmail = x.AmigoOculto.Email
+                }).ToListAsync();
+
             return Ok(sorteio);
         }
     }
