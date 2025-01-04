@@ -24,8 +24,8 @@ namespace AmigoOculto.Controllers
         public async Task<IActionResult> GetByIdAsync([FromServices] AppDbContext context, [FromRoute] int id)
         {
             var grupo = await context.Grupos.AsNoTracking().FirstOrDefaultAsync(x => x.id == id);
-            
-            if(grupo == null)
+
+            if (grupo == null)
             {
                 return NotFound();
             }
@@ -88,6 +88,56 @@ namespace AmigoOculto.Controllers
             {
                 return BadRequest();
             }
+        }
+
+        [HttpPost("grupos/{grupoId}/sorteio")]
+        public async Task<IActionResult> SortearGrupoAsync([FromServices] AppDbContext context, [FromRoute] int grupoId)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            var participantes = await context.Participantes.AsNoTracking().Where(p => p.GrupoId == grupoId).ToListAsync();
+
+            if (participantes.Count < 3)
+            {
+                return BadRequest(new { message = "O grupo precisa ter ao menos 3 participantes para realizar o sorteio" });
+            }
+
+            var random = new Random();
+            var embaralhados = participantes.OrderBy(x => random.Next()).ToList();
+
+            var sorteios = new List<Sorteio>();
+            for (int i = 0; i < embaralhados.Count; i++)
+            {
+                var participante = embaralhados[i];
+                var amigoOculto = embaralhados[(i + 1) % embaralhados.Count];
+
+                sorteios.Add(new Sorteio
+                {
+                    GrupoId = grupoId,
+                    ParticipanteId = participante.Id,
+                    AmigoOcultoId = amigoOculto.Id
+                });
+            }
+
+            try
+            {
+                await context.Sorteios.AddRangeAsync(sorteios);
+                await context.SaveChangesAsync();
+                return Ok(new { message = "Sorteio realizado com sucesso ! "});
+            }catch(Exception e)
+            {
+                return BadRequest();
+            }
+
+        }
+
+        [HttpGet("grupos/{grupoId}/sorteio")]
+        public async Task<IActionResult> GetSorteioAsync([FromServices] AppDbContext context, [FromRoute] int grupoId)
+        {
+            var sorteio = await context.Sorteios.AsNoTracking().Where(x => x.GrupoId == grupoId).ToListAsync();
+            return Ok(sorteio);
         }
     }
 }
